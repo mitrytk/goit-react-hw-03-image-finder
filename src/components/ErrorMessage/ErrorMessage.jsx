@@ -1,5 +1,6 @@
 import style from './errorMessage.module.scss'
 import React, { Component } from "react";
+import PropTypes from 'prop-types';
 
 class ErrorMessage extends Component {
     render() {
@@ -9,6 +10,10 @@ class ErrorMessage extends Component {
             </div>
         )
     }
+}
+
+ErrorMessage.propTypes = {
+    message: PropTypes.string,
 }
 
 export default ErrorMessage;
