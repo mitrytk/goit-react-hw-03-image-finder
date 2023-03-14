@@ -5,6 +5,7 @@ import style from './imageGallery.module.scss';
 import ImageGalleryItem from './ImageGalleryItem/ImageGalleryItem';
 import Loader from "components/Loader/Loader";
 import Button from "components/Button/Button";
+import ErrorMessage from "components/ErrorMessage/ErrorMessage";
 
 class ImageGallery extends Component {
     state = {
@@ -64,7 +65,9 @@ class ImageGallery extends Component {
                                 status: 'resolved'}
                         });
                     }
+                    return Promise.reject(new Error('Error'))
                 })
+                .catch(() => this.setState({status: 'rejected'}))
                 .finally(() => this.setState({loader: false}))
     }
 
@@ -79,7 +82,7 @@ class ImageGallery extends Component {
             return (<Loader />)
         }
         if (this.state.status === 'rejected') {
-            return (<div>ошибка</div>)
+            return (<ErrorMessage message={'Nothing found for your request :('}/>);
         }
         if (this.state.status === 'resolved') {
             return (
