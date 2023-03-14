@@ -41,4 +41,9 @@ class Modal extends Component {
     }
 }
 
+Modal.propTypes = {
+    img: PropTypes.object,
+    closeModal: PropTypes.func,
+}
+
 export default Modal;
