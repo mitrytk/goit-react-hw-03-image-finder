@@ -13,14 +13,8 @@ class Searchbar extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        if (this.state.search.trim() === '') {
-            alert('ты че, слово не ввел?');
-            alert('я для кого старался?');
-            alert('код пишу, а тебе даже лень ввести что-то сюда');
-            alert('ой все');
-            return
-        }
-        this.props.onSubmit(this.state.search);
+        
+        this.props.onSubmit(this.state.search.trim());
         this.setState({search: ''})
 
     }

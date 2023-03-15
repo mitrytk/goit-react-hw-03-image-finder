@@ -13,35 +13,47 @@ import ErrorMessage from "./ErrorMessage/ErrorMessage";
 export class App extends Component {
   state = {
     search: '',
-    selected: null,
+    message: '',
     status: 'idle',
+    gallery: [],
+    selected: null,
     page: 1,
     loader: false,
+    showBtn: false,
   }
   
   componentDidUpdate(prevProps, prevState) {
     const { page, search } = this.state;
     
-    if (prevState.search !== search) {
-        this.setState({
-            status: 'pending',
-            page: 1,
-        }, () => this.handleAPI(1, true))
+    if (prevState.search !== search || prevState.page !== page) {
+       this.handleAPI(page)
     }
 
-    if (prevState.page !== page) {
-        this.handleAPI(page, false);
-
-        this.setState({loader: true});
-    }
   }
 
   onSubmitForm = (state) => {
-    
-    this.setState({search: state})
+    if (!state) {
+      return this.setState({
+        status: 'rejected',
+        message: 'string must not be empty'
+      })
+    }
+
+    this.setState({
+      search: state,
+      status: 'pending',
+      gallery: [],
+      loader: true,
+      page: 1,
+      showBtn: false,
+    })
   }
 
   onSelected = (e) => {
+    
+    if (e.target.src === undefined) {
+      return;
+    }
     this.setState({selected: {url: e.target.src, alt: e.target.alt}})
   }
 
@@ -55,38 +67,30 @@ export class App extends Component {
       })
   }
 
-  handleAPI = (page, isNewSearch) => {
+  handleAPI = (page) => {
+      this.setState({loader: true})
+
       galleryApi
         .fetchGallery(page, this.state.search)
-        .then(res => {
-          if (res.ok) {
-             return res.json();
-          }
-
-          return Promise.reject(new Error('Error'))
-        })
         .then(data => {
-          if (data.total !== 0) {
+          if (data.total === 0) {
+            return this.setState({
+              status: 'rejected',
+              message: 'Nothing found for your request :(',
+            })
+          }
             return this.setState(prevState => {
-
-              if (!isNewSearch) {
-                return {
-                  gallery: [ ...prevState.gallery, ...data.hits],
-                  status: 'resolved',
-                  showBtn: this.state.page < Math.ceil(data.total / 12),
-                }
-              }
-
               return {
-                gallery: [...data.hits],
+                gallery: [ ...prevState.gallery, ...data.hits],
                 status: 'resolved',
                 showBtn: this.state.page < Math.ceil(data.total / 12),
               }
             });
-          }
-            return Promise.reject(new Error('Error'))
         })
-        .catch(() => this.setState({status: 'rejected'}))
+        .catch(() => this.setState({
+          status: 'rejected',
+          message: 'Ooops... something went wrong :(',
+        }))
         .finally(() => this.setState({loader: false}))
   }
 
@@ -100,7 +104,7 @@ export class App extends Component {
         }
 
         {this.state.status === 'rejected' && 
-          <ErrorMessage message={'Nothing found for your request :('}/>
+          <ErrorMessage message={this.state.message}/>
         }
 
         {this.state.status === 'resolved' && 
